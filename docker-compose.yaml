@@ -46,6 +46,13 @@ services:
       PGADMIN_DEFAULT_EMAIL: '${PGADMIN_EMAIL:-mpvillafranca94@gmail.com}'
       PGADMIN_DEFAULT_PASSWORD: '${PGADMIN_PASSWORD}'
       PGADMIN_LISTEN_PORT: '80'
+      # pgAdmin ata la sesion a la IP del cliente. Detras de un CDN cada
+      # peticion llega por un edge distinto —se contaron 10 IPs en 2 minutos—,
+      # asi que la sesion se invalidaba sola y /login y /browser/ se
+      # redirigian mutuamente en un bucle infinito, con la pagina cargando
+      # para siempre. Quien entra ya viene autenticado por Authentik, que es
+      # el control que de verdad protege esto.
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: '${PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION:-False}'
     volumes:
       - 'davinci-pgadmin:/var/lib/pgadmin'
 
