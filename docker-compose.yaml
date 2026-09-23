@@ -53,6 +53,19 @@ services:
       # para siempre. Quien entra ya viene autenticado por Authentik, que es
       # el control que de verdad protege esto.
       PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: '${PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION:-False}'
+      # SSO: Authentik ya identifica a quien entra, asi que pgAdmin toma el
+      # usuario de la cabecera que aquel inyecta en vez de pedir otra
+      # contrasena. `webserver` lee de request.headers el nombre configurado
+      # aqui abajo; Traefik borra esas cabeceras antes del forward-auth para
+      # que solo puedan venir de Authentik (ver authentik-pgadmin.yaml).
+      #
+      # `internal` se deja DETRAS a proposito: si la cabecera algun dia no
+      # llega, aparece el formulario de siempre en vez de dejar a nadie fuera
+      # de la consola de administracion de las bases.
+      PGADMIN_CONFIG_AUTHENTICATION_SOURCES: "${PGADMIN_CONFIG_AUTHENTICATION_SOURCES:-['webserver', 'internal']}"
+      PGADMIN_CONFIG_WEBSERVER_REMOTE_USER: "${PGADMIN_CONFIG_WEBSERVER_REMOTE_USER:-'X-authentik-email'}"
+      # Da de alta al usuario en pgAdmin la primera vez que entra por SSO.
+      PGADMIN_CONFIG_WEBSERVER_AUTO_CREATE_USER: '${PGADMIN_CONFIG_WEBSERVER_AUTO_CREATE_USER:-True}'
     volumes:
       - 'davinci-pgadmin:/var/lib/pgadmin'
 
